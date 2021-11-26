@@ -1,2 +1,2 @@
-# external-aimbot
-A very clean CS:GO FOV based aimbot meant for learning
+# About
+A very clean external aimbot written as a YouTube tutorial.

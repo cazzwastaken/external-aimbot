@@ -1,7 +1,7 @@
 #include "memory.h"
+#include "vector.h"
 
 #include <thread>
-#include <numbers>
 
 namespace offset
 {
@@ -24,52 +24,6 @@ namespace offset
 	constexpr ::std::ptrdiff_t m_bSpottedByMask = 0x980;
 }
 
-struct Vector3
-{
-	constexpr Vector3(
-		const float x = 0.f,
-		const float y = 0.f,
-		const float z = 0.f) noexcept :
-		x(x), y(y), z(z) { }
-
-
-	constexpr const Vector3& operator-(const Vector3& other) const noexcept
-	{
-		return Vector3{ x - other.x, y - other.y, z - other.z };
-	}
-
-	constexpr const Vector3& operator+(const Vector3& other) const noexcept
-	{
-		return Vector3{ x + other.x, y + other.y, z + other.z };
-	}
-
-	constexpr const Vector3& operator/(const float factor) const noexcept
-	{
-		return Vector3{ x / factor, y / factor, z / factor };
-	}
-
-	constexpr const Vector3& operator*(const float factor) const noexcept
-	{
-		return Vector3{ x * factor, y * factor, z * factor };
-	}
-
-
-	constexpr const Vector3& ToAngle() const noexcept
-	{
-		return Vector3{
-			std::atan2(-z, std::hypot(x, y)) * (180.0f / std::numbers::pi_v<float>),
-			std::atan2(y, x) * (180.0f / std::numbers::pi_v<float>),
-			0.0f };
-	}
-
-	constexpr const bool IsZero() const noexcept
-	{
-		return x == 0.f && y == 0.f && z == 0.f;
-	}
-
-	float x, y, z;
-};
-
 constexpr Vector3 CalculateAngle(
 	const Vector3& localPosition,
 	const Vector3& enemyPosition,
@@ -90,6 +44,8 @@ int main()
 	// infinite hack loop
 	while (true)
 	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
 		// aimbot key
 		if (!GetAsyncKeyState(VK_RBUTTON))
 			continue;
@@ -151,12 +107,9 @@ int main()
 			}
 		}
 
-		// if we have a best angle
-		// do aimbot
+		// if we have a best angle, do aimbot
 		if (!bestAngle.IsZero())
-			memory.Write<Vector3>(clientState + offset::dwClientState_ViewAngles, viewAngles + bestAngle / 3.f);
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			memory.Write<Vector3>(clientState + offset::dwClientState_ViewAngles, viewAngles + bestAngle / 3.f); // smoothing
 	}
 
 	return 0;
