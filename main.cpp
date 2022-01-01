@@ -12,6 +12,7 @@ namespace offset
 	// engine
 	constexpr ::std::ptrdiff_t dwClientState = 0x589FC4;
 	constexpr ::std::ptrdiff_t dwClientState_ViewAngles = 0x4D90;
+	constexpr ::std::ptrdiff_t dwClientState_GetLocalPlayer = 0x180;
 
 	// entity
 	constexpr ::std::ptrdiff_t m_dwBoneMatrix = 0x26A8;
@@ -60,6 +61,9 @@ int main()
 
 		const auto& clientState = memory.Read<std::uintptr_t>(engine + offset::dwClientState);
 
+		const auto& localPlayerId =
+			memory.Read<std::int32_t>(clientState + offset::dwClientState_GetLocalPlayer);
+
 		const auto& viewAngles = memory.Read<Vector3>(clientState + offset::dwClientState_ViewAngles);
 		const auto& aimPunch = memory.Read<Vector3>(localPlayer + offset::m_aimPunchAngle) * 2;
 
@@ -80,30 +84,31 @@ int main()
 			if (!memory.Read<std::int32_t>(player + offset::m_iHealth))
 				continue;
 
-			if (!memory.Read<bool>(player + offset::m_bSpottedByMask))
-				continue;
-
-			const auto boneMatrix = memory.Read<std::uintptr_t>(player + offset::m_dwBoneMatrix);
-
-			// pof of player head in 3d space
-			const auto playerHeadPosition = Vector3{
-				memory.Read<float>(boneMatrix + 0x30 * 8 + 0x0C),
-				memory.Read<float>(boneMatrix + 0x30 * 8 + 0x1C),
-				memory.Read<float>(boneMatrix + 0x30 * 8 + 0x2C)
-			};
-
-			const auto angle = CalculateAngle(
-				localEyePosition,
-				playerHeadPosition,
-				viewAngles + aimPunch
-			);
-
-			const auto fov = std::hypot(angle.x, angle.y);
-
-			if (fov < bestFov)
+			if (memory.Read<std::int32_t>(player + offset::m_bSpottedByMask) & (1 << localPlayerId))
 			{
-				bestFov = fov;
-				bestAngle = angle;
+				const auto boneMatrix = memory.Read<std::uintptr_t>(player + offset::m_dwBoneMatrix);
+
+				// pos of player head in 3d space
+				// 8 is the head bone index :)
+				const auto playerHeadPosition = Vector3{
+					memory.Read<float>(boneMatrix + 0x30 * 8 + 0x0C),
+					memory.Read<float>(boneMatrix + 0x30 * 8 + 0x1C),
+					memory.Read<float>(boneMatrix + 0x30 * 8 + 0x2C)
+				};
+
+				const auto angle = CalculateAngle(
+					localEyePosition,
+					playerHeadPosition,
+					viewAngles + aimPunch
+				);
+
+				const auto fov = std::hypot(angle.x, angle.y);
+
+				if (fov < bestFov)
+				{
+					bestFov = fov;
+					bestAngle = angle;
+				}
 			}
 		}
 
