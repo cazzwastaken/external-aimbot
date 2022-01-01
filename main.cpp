@@ -6,11 +6,11 @@
 namespace offset
 {
 	// client
-	constexpr ::std::ptrdiff_t dwLocalPlayer = 0xDA746C;
-	constexpr ::std::ptrdiff_t dwEntityList = 0x4DC178C;
+	constexpr ::std::ptrdiff_t dwLocalPlayer = 0xDB558C;
+	constexpr ::std::ptrdiff_t dwEntityList = 0x4DD0AB4;
 
 	// engine
-	constexpr ::std::ptrdiff_t dwClientState = 0x589FCC;
+	constexpr ::std::ptrdiff_t dwClientState = 0x589FC4;
 	constexpr ::std::ptrdiff_t dwClientState_ViewAngles = 0x4D90;
 
 	// entity
