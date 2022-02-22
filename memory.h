@@ -32,11 +32,17 @@ public:
 			}
 		}
 
-		if (snapShot) ::CloseHandle(snapShot);
+		// Free handle
+		if (snapShot)
+			::CloseHandle(snapShot);
 	}
 
 	// Destructor that frees the opened handle
-	~Memory() { if (processHandle) ::CloseHandle(processHandle); }
+	~Memory()
+	{
+		if (processHandle)
+			::CloseHandle(processHandle);
+	}
 
 	// Returns the base address of a module by name
 	const std::uintptr_t GetModuleAddress(const std::string_view moduleName) const noexcept
@@ -57,14 +63,15 @@ public:
 			}
 		}
 
-		if (snapShot) ::CloseHandle(snapShot);
+		if (snapShot)
+			::CloseHandle(snapShot);
 
 		return result;
 	}
 
 	// Read process memory
 	template <typename T>
-	constexpr const T& Read(const std::uintptr_t& address) const noexcept
+	constexpr const T Read(const std::uintptr_t& address) const noexcept
 	{
 		T value = { };
 		::ReadProcessMemory(processHandle, reinterpret_cast<const void*>(address), &value, sizeof(T), NULL);
