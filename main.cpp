@@ -25,7 +25,7 @@ namespace offset
 	constexpr ::std::ptrdiff_t m_bSpottedByMask = 0x980;
 }
 
-constexpr Vector3 CalculateAngle(
+Vector3 CalculateAngle(
 	const Vector3& localPosition,
 	const Vector3& enemyPosition,
 	const Vector3& viewAngles) noexcept
